@@ -1,8 +1,37 @@
 <!DOCTYPE html>
 <html>
-
+<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
   <body>
-  
+<div id="introPopup" class="intro-overlay">
+  <div class="intro-box">
+    <button class="close-btn" onclick="closeIntro()">×</button>
+
+    <div class="intro-content">
+      <p class="intro-small">WELCOME TO</p>
+
+      <h1>GlitchyOS</h1>
+
+      <h2>Hello, I'm Dee.</h2>
+
+      <p>
+        I'm a student and an indie game developer. 
+      </p>
+
+      <p>
+        I built glitchyOS as my own personal OS,
+        you can explore my projects, games, interests, and whatever weird stuff
+      </p>
+
+      <button class="enter-btn" onclick="closeIntro()">
+        Enter glitchyOS →
+      </button>
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
   </body>
 
 </html>
