@@ -1,72 +1,76 @@
-const clock = document.getElementById("clock");
-const windows = document.querySelectorAll(".os-window");
+const timeElement = document.getElementById("timeElement");
+const welcomeWindow = document.getElementById("welcome");
+const welcomeClose = document.getElementById("welcomeclose");
+const welcomeOpen = document.getElementById("welcomeOpen");
+const desktopIcon = document.getElementById("desktopIcon");
+
 let highestZIndex = 10;
 
-function updateClock() {
-  clock.textContent = new Intl.DateTimeFormat([], {
+function updateTime() {
+  timeElement.textContent = new Intl.DateTimeFormat([], {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit"
   }).format(new Date());
 }
 
-function focusWindow(windowElement) {
+function focusWindow(element) {
   highestZIndex += 1;
-  windowElement.style.zIndex = highestZIndex;
+  element.style.zIndex = highestZIndex;
 }
 
-function openWindow(windowId) {
-  const windowElement = document.getElementById(windowId);
-  if (!windowElement) return;
-
-  windowElement.hidden = false;
-  focusWindow(windowElement);
+function openWindow(element) {
+  element.style.display = "flex";
+  focusWindow(element);
 }
 
-function closeWindow(windowElement) {
-  windowElement.hidden = true;
+function closeWindow(element) {
+  element.style.display = "none";
 }
 
-function closeIntro() {
-  const introWindow = document.getElementById("introPopup");
-  if (introWindow) closeWindow(introWindow);
+function dragElement(element) {
+  let initialX = 0;
+  let initialY = 0;
+  let currentX = 0;
+  let currentY = 0;
+
+  const header = document.getElementById(element.id + "header");
+
+  if (header) {
+    header.onmousedown = startDragging;
+  } else {
+    element.onmousedown = startDragging;
+  }
+
+  function startDragging(event) {
+    event.preventDefault();
+    initialX = event.clientX;
+    initialY = event.clientY;
+    document.onmouseup = stopDragging;
+    document.onmousemove = drag;
+    focusWindow(element);
+  }
+
+  function drag(event) {
+    event.preventDefault();
+    currentX = initialX - event.clientX;
+    currentY = initialY - event.clientY;
+    initialX = event.clientX;
+    initialY = event.clientY;
+    element.style.top = `${element.offsetTop - currentY}px`;
+    element.style.left = `${element.offsetLeft - currentX}px`;
+  }
+
+  function stopDragging() {
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
 }
 
-document.querySelectorAll("[data-open-window]").forEach((icon) => {
-  icon.addEventListener("click", () => openWindow(icon.dataset.openWindow));
-});
+welcomeClose.addEventListener("click", () => closeWindow(welcomeWindow));
+welcomeOpen.addEventListener("click", () => openWindow(welcomeWindow));
+desktopIcon.addEventListener("click", () => openWindow(welcomeWindow));
 
-windows.forEach((windowElement) => {
-  const closeButton = windowElement.querySelector(".window-close");
-  const enterButton = windowElement.querySelector(".enter-btn");
-  const header = windowElement.querySelector(".window-header");
-
-  closeButton.addEventListener("click", (event) => {
-    event.stopPropagation();
-    closeWindow(windowElement);
-  });
-  enterButton?.addEventListener("click", closeIntro);
-  windowElement.addEventListener("pointerdown", () => focusWindow(windowElement));
-
-  header.addEventListener("pointerdown", (event) => {
-    if (event.target.closest("button")) return;
-
-    const startX = event.clientX;
-    const startY = event.clientY;
-    const startLeft = windowElement.offsetLeft;
-    const startTop = windowElement.offsetTop;
-    const onMove = (moveEvent) => {
-      windowElement.style.left = `${startLeft + moveEvent.clientX - startX}px`;
-      windowElement.style.top = `${startTop + moveEvent.clientY - startY}px`;
-      windowElement.style.transform = "none";
-    };
-    const onUp = () => document.removeEventListener("pointermove", onMove);
-
-    focusWindow(windowElement);
-    document.addEventListener("pointermove", onMove);
-    document.addEventListener("pointerup", onUp, { once: true });
-  });
-});
-
-updateClock();
-setInterval(updateClock, 1000);
+dragElement(welcomeWindow);
+updateTime();
+setInterval(updateTime, 1000);
