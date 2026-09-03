@@ -1,76 +1,43 @@
-const timeElement = document.getElementById("timeElement");
-const welcomeWindow = document.getElementById("welcome");
-const welcomeClose = document.getElementById("welcomeclose");
-const welcomeOpen = document.getElementById("welcomeOpen");
-const desktopIcon = document.getElementById("desktopIcon");
-
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => [...document.querySelectorAll(selector)];
+const timeElement = $("#timeElement");
+const appData = { about: ["about", "ⓘ"], terminal: ["terminal", "⌁"], files: ["files", "▤"], notes: ["notes", "✎"] };
 let highestZIndex = 10;
+let notificationTimer;
 
-function updateTime() {
-  timeElement.textContent = new Intl.DateTimeFormat([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
-  }).format(new Date());
-}
+function updateTime() { timeElement.textContent = new Intl.DateTimeFormat([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date()); }
+function focusWindow(element) { highestZIndex += 1; element.style.zIndex = highestZIndex; $$(".taskbar-app").forEach((item) => item.classList.toggle("active", item.dataset.app === element.id)); }
+function openWindow(elementOrId) { const element = typeof elementOrId === "string" ? document.getElementById(elementOrId) : elementOrId; if (!element) return; element.style.display = "flex"; focusWindow(element); if (element.id === "terminal") $("#terminalInput").focus(); if (element.id === "notes") renderNotes(); if (element.id === "files") renderFiles(); if (element.id === "about") notify("why are u reading this"); if (Math.random() < 0.025) glitchWindow(element); if (element.id !== "glitch" && Math.random() < 0.01) { setTimeout(() => { closeWindow(element); notify("ok that app left"); }, 260); } }
+function closeWindow(element) { element.style.display = "none"; const task = $(`.taskbar-app[data-app="${element.id}"]`); if (task) task.classList.remove("active"); }
+function notify(message) { const element = $("#notification"); element.textContent = message; element.classList.add("show"); clearTimeout(notificationTimer); notificationTimer = setTimeout(() => element.classList.remove("show"), 2600); }
+function dragElement(element) { const header = $(`#${element.id}header`); if (!header) return; let startX; let startY; let startLeft; let startTop; header.addEventListener("pointerdown", (event) => { if (event.target.closest("button")) return; event.preventDefault(); focusWindow(element); startX = event.clientX; startY = event.clientY; const rect = element.getBoundingClientRect(); startLeft = rect.left; startTop = rect.top; header.setPointerCapture(event.pointerId); const move = (moveEvent) => { element.style.left = `${startLeft + moveEvent.clientX - startX + element.offsetWidth / 2}px`; element.style.top = `${startTop + moveEvent.clientY - startY + element.offsetHeight / 2}px`; element.style.transform = "translate(-50%, -50%)"; }; const stop = () => { header.removeEventListener("pointermove", move); header.removeEventListener("pointerup", stop); }; header.addEventListener("pointermove", move); header.addEventListener("pointerup", stop); }); }
 
-function focusWindow(element) {
-  highestZIndex += 1;
-  element.style.zIndex = highestZIndex;
-}
+function buildDesktop() { const desktop = $("#desktopIcons"); const launcher = $("#launcherGrid"); Object.entries(appData).forEach(([id, data]) => { const icon = document.createElement("button"); icon.className = "desktop-icon"; icon.type = "button"; icon.dataset.app = id; icon.innerHTML = `<span class="icon-art" aria-hidden="true">${data[1]}</span><span>${data[0]}</span>`; icon.addEventListener("click", () => openWindow(id)); desktop.appendChild(icon); const item = document.createElement("button"); item.className = "launcher-item"; item.type = "button"; item.dataset.app = id; item.innerHTML = `<span>${data[1]}</span><span>${data[0]}</span>`; item.addEventListener("click", () => { openWindow(id); toggleLauncher(false); }); launcher.appendChild(item); }); }
+function setupWindows() { $$(".app-window, #welcome").forEach((windowElement) => { dragElement(windowElement); windowElement.addEventListener("mousedown", () => focusWindow(windowElement)); const close = windowElement.querySelector(".close-button"); if (close) close.addEventListener("click", () => { closeWindow(windowElement); if (windowElement.id === "terminal") notify("already leaving?"); }); const minimize = windowElement.querySelector(".minimize"); if (minimize) minimize.addEventListener("click", () => closeWindow(windowElement)); }); }
+function toggleLauncher(force) { const launcher = $("#launcher"); const show = typeof force === "boolean" ? force : launcher.hidden; launcher.hidden = !show; $("#launcherButton").setAttribute("aria-expanded", String(show)); }
+function setupTaskbar() { const taskbar = $("#taskbarApps"); Object.keys(appData).forEach((id) => { const item = document.createElement("button"); item.className = "taskbar-app"; item.type = "button"; item.dataset.app = id; item.textContent = appData[id][0]; item.addEventListener("click", () => { const windowElement = document.getElementById(id); if (windowElement.style.display === "flex") closeWindow(windowElement); else openWindow(id); }); taskbar.appendChild(item); }); }
 
-function openWindow(element) {
-  element.style.display = "flex";
-  focusWindow(element);
-}
+const terminalOutput = $("#terminalOutput");
+const commandHistory = [];
+let historyIndex = 0;
+function terminalPrint(text, result = false) { const line = document.createElement("div"); line.className = result ? "terminal-result" : "terminal-line"; line.textContent = text; terminalOutput.appendChild(line); terminalOutput.scrollTop = terminalOutput.scrollHeight; }
+function runCommand(rawCommand) { const command = rawCommand.trim(); if (!command) return; terminalPrint(`dee@glitchyOS:~$ ${command}`); const [name, ...args] = command.toLowerCase().split(/\s+/); const target = args.join(" "); switch (name) { case "help": terminalPrint("u need help?\nhelp  clear  ls  open <app>  about  whoami  glitch", true); break; case "clear": terminalOutput.innerHTML = ""; break; case "ls": terminalPrint("stuff", true); break; case "about": terminalPrint("glitchyOS 0.7.3\nmade by dee because normal apps are boring", true); break; case "whoami": terminalPrint("idk who are u", true); break; case "open": if (Object.keys(appData).includes(target)) { openWindow(target); terminalPrint(`opening ${target}...`, true); } else terminalPrint(`${target || "that"} is not real bro`, true); break; case "glitch": terminalPrint("nah", true); openWindow("glitch"); glitchWindow($("#terminal")); notify("the terminal sneezed"); break; case "secret": terminalPrint("ok fine. you found the dumb command.", true); notify("u get nothing. congrats"); break; case "sudo": terminalPrint("no", true); break; default: terminalPrint(["nah", "wtf is that", "something broke lol", "try help i guess"][Math.floor(Math.random() * 4)], true); } }
+$("#terminalForm").addEventListener("submit", (event) => { event.preventDefault(); const input = $("#terminalInput"); const command = input.value.trim(); if (command) { commandHistory.push(command); historyIndex = commandHistory.length; runCommand(command); } input.value = ""; });
+$("#terminalInput").addEventListener("keydown", (event) => { if (event.key === "ArrowUp") { event.preventDefault(); historyIndex = Math.max(0, historyIndex - 1); event.currentTarget.value = commandHistory[historyIndex] || ""; } if (event.key === "ArrowDown") { event.preventDefault(); historyIndex = Math.min(commandHistory.length, historyIndex + 1); event.currentTarget.value = commandHistory[historyIndex] || ""; } });
 
-function closeWindow(element) {
-  element.style.display = "none";
-}
+const files = [{ name: "notes.txt", content: "write something dumb here." }, { name: "about-me.dee", content: "made by dee\nbecause normal apps are boring" }, { name: "definitely-not-a-virus.txt", content: "it is probably fine." }];
+function renderFiles() { const grid = $("#fileGrid"); grid.innerHTML = ""; files.forEach((file) => { const item = document.createElement("button"); item.className = "file-item"; item.type = "button"; item.innerHTML = `<span class="file-symbol">▤</span><span>${file.name}</span>`; item.addEventListener("click", () => { $("#filePreview").textContent = file.content; if (file.name.includes("virus")) notify("bro that file is suspicious"); }); grid.appendChild(item); }); }
+let notes = JSON.parse(localStorage.getItem("glitchy-notes") || "null") || [{ id: Date.now(), title: "untitled note", body: "write something before u forget it." }]; let selectedNote = notes[0].id;
+function saveNotes() { localStorage.setItem("glitchy-notes", JSON.stringify(notes)); $("#noteStatus").textContent = `saved ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`; }
+function renderNotes() { const list = $("#notesList"); list.innerHTML = ""; notes.forEach((note) => { const item = document.createElement("button"); item.className = `note-list-item${note.id === selectedNote ? " active" : ""}`; item.type = "button"; item.innerHTML = `<strong>${note.title || "Untitled note"}</strong><small>${note.body.slice(0, 28) || "empty note"}</small>`; item.addEventListener("click", () => { selectedNote = note.id; renderNotes(); }); list.appendChild(item); }); const note = notes.find((item) => item.id === selectedNote) || notes[0]; if (note) { $("#noteTitle").value = note.title; $("#noteBody").value = note.body; } }
+function updateSelectedNote() { const note = notes.find((item) => item.id === selectedNote); if (!note) return; note.title = $("#noteTitle").value; note.body = $("#noteBody").value; saveNotes(); renderNotes(); }
+$("#noteTitle").addEventListener("input", updateSelectedNote); $("#noteBody").addEventListener("input", updateSelectedNote); $("#deleteNoteButton").addEventListener("click", () => { if (notes.length === 1) notes[0] = { id: Date.now(), title: "Untitled note", body: "" }; else { notes = notes.filter((note) => note.id !== selectedNote); selectedNote = notes[0].id; } saveNotes(); renderNotes(); notify("Note deleted"); });
 
-function dragElement(element) {
-  let initialX = 0;
-  let initialY = 0;
-  let currentX = 0;
-  let currentY = 0;
 
-  const header = document.getElementById(element.id + "header");
+function glitchWindow(element) { if (!element) return; element.classList.add("being-weird"); setTimeout(() => element.classList.remove("being-weird"), 420); }
+const glitchLines = ["you found the door.", "why are u still here", "the computer says hi.", "ok wait.", "...did the desktop just blink?", "never mind. pretend u saw nothing."]; let glitchIndex = 0; $("#glitchButton").addEventListener("click", () => { glitchIndex = (glitchIndex + 1) % glitchLines.length; $("#glitchText").textContent = glitchLines[glitchIndex]; $("#glitchButton").textContent = glitchIndex === 2 ? "uh oh" : glitchIndex === glitchLines.length - 1 ? "leave" : "do not click"; if (glitchIndex === 2) { glitchWindow($("#glitch")); notify("ok that was not supposed to happen"); } if (glitchIndex === glitchLines.length - 1) notify("nah we're good"); });
+let launcherClicks = 0; $("#launcherButton").addEventListener("click", () => { launcherClicks += 1; toggleLauncher(); if (launcherClicks === 5) notify("bro it is still the same menu"); }); $("#timeElement").addEventListener("click", () => notify("its literally just a clock bro")); $("#restartButton").addEventListener("click", () => { notify("restarting... probably"); setTimeout(() => window.location.reload(), 900); }); $("#shutdownButton").addEventListener("click", () => { $("#shutdownScreen").hidden = false; $("#shutdownText").textContent = "ok bye i guess"; setTimeout(() => { $("#shutdownText").textContent = "lol no"; }, 1000); });
+function randomGlitch() { if (Math.random() > 0.18) return; const roll = Math.random(); if (roll < 0.28) notify(["bro why did u click that", "something broke lol", "nah we're good", "who left this on?"][Math.floor(Math.random() * 4)]); else if (roll < 0.52) { const openWindows = $$(".window").filter((element) => element.style.display === "flex"); glitchWindow(openWindows[Math.floor(Math.random() * openWindows.length)]); } else if (roll < 0.75) { const icons = $$(".desktop-icon"); const icon = icons[Math.floor(Math.random() * icons.length)]; if (icon) { icon.style.transform = `translate(${Math.random() * 18 - 9}px, ${Math.random() * 12 - 6}px)`; setTimeout(() => { icon.style.transform = ""; }, 900); } } else { const text = $(".os-name"); const oldText = text.firstChild.textContent; text.firstChild.textContent = "glitchyOS?"; setTimeout(() => { text.firstChild.textContent = oldText; }, 650); } }
+document.addEventListener("keydown", (event) => { if (event.key === "Escape") toggleLauncher(false); if (event.ctrlKey && event.altKey && event.key.toLowerCase() === "t") { event.preventDefault(); openWindow("terminal"); } if (event.altKey && /^[1-4]$/.test(event.key)) openWindow(Object.keys(appData)[Number(event.key) - 1]); });
 
-  if (header) {
-    header.onmousedown = startDragging;
-  } else {
-    element.onmousedown = startDragging;
-  }
-
-  function startDragging(event) {
-    event.preventDefault();
-    initialX = event.clientX;
-    initialY = event.clientY;
-    document.onmouseup = stopDragging;
-    document.onmousemove = drag;
-    focusWindow(element);
-  }
-
-  function drag(event) {
-    event.preventDefault();
-    currentX = initialX - event.clientX;
-    currentY = initialY - event.clientY;
-    initialX = event.clientX;
-    initialY = event.clientY;
-    element.style.top = `${element.offsetTop - currentY}px`;
-    element.style.left = `${element.offsetLeft - currentX}px`;
-  }
-
-  function stopDragging() {
-    document.onmouseup = null;
-    document.onmousemove = null;
-  }
-}
-
-welcomeClose.addEventListener("click", () => closeWindow(welcomeWindow));
-welcomeOpen.addEventListener("click", () => openWindow(welcomeWindow));
-desktopIcon.addEventListener("click", () => openWindow(welcomeWindow));
-
-dragElement(welcomeWindow);
-updateTime();
-setInterval(updateTime, 1000);
+buildDesktop(); setupTaskbar(); setupWindows(); renderFiles(); renderNotes(); updateTime(); setInterval(updateTime, 1000); setInterval(randomGlitch, 45000); setTimeout(() => { $("#bootScreen").classList.add("boot-done"); setTimeout(() => { $("#bootScreen").hidden = true; }, 400); }, 900);
