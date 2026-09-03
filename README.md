@@ -1,7 +1,7 @@
 # glitchyOS
 
 ## a tiny fake operating system i made because why not
-
+demo link- https://deepakverma-afk.github.io/glitchyOS/
 basically a weird webOS that you can mess around with
 
 ## stuff in it
