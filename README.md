@@ -5,15 +5,15 @@
 basically a weird webOS that you can mess around with
 
 ## stuff in it
-terminal
-notes
-files
-about
-draggable windows
-notifications
-random glitches
-stupid terminal responses
-hidden glitch command
+terminal,
+notes,
+files,
+about,
+draggable windows,
+notifications,
+random glitches,
+stupid terminal responses,
+hidden glitch command and
 a secret glitch sequence
 
 some things are bugs
