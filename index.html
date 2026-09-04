@@ -14,11 +14,6 @@
       <div class="scanlines" aria-hidden="true"></div>
       <nav class="desktop-icons" id="desktopIcons" aria-label="Desktop applications"></nav>
 
-      <section class="launcher" id="launcher" aria-label="Application launcher" hidden>
-        <div class="launcher-heading"><span>apps i guess</span><span class="signal-dot"></span></div>
-        <div class="launcher-grid" id="launcherGrid"></div>
-      </section>
-
       <section class="window app-window" id="terminal" aria-label="Terminal window" style="display: none;">
         <div class="window-header" id="terminalheader"><span class="window-title">terminal.exe</span><div class="window-actions"><button class="window-action minimize" type="button" aria-label="Minimize">_</button><button class="close-button" type="button" aria-label="Close">×</button></div></div>
         <div class="terminal-content"><div class="terminal-output" id="terminalOutput" aria-live="polite"></div><form class="terminal-form" id="terminalForm"><span class="prompt">dee@glitchyOS:~$</span><input id="terminalInput" autocomplete="off" spellcheck="false" aria-label="Terminal command" /></form></div>
@@ -34,17 +29,17 @@
         <div class="notes-layout"><aside class="notes-list" id="notesList"></aside><div class="note-editor"><input id="noteTitle" class="note-title" value="Untitled note" aria-label="Note title" /><textarea id="noteBody" placeholder="Start writing..." aria-label="Note body"></textarea><div class="note-footer"><span id="noteStatus">autosave ready</span><button id="deleteNoteButton" class="danger-button" type="button">delete</button></div></div></div>
       </section>
 
-      <section class="window app-window" id="about" aria-label="about window" style="display: none;"><div class="window-header" id="aboutheader"><span class="window-title">about-me.dee</span><div class="window-actions"><button class="window-action minimize" type="button" aria-label="minimize">_</button><button class="close-button" type="button" aria-label="close">×</button></div></div><div class="window-content about-content"><p class="eyebrow">welcome i guess</p><h1>glitchyOS</h1><h2>hi, i'm dee.</h2><p>i'm a student and an indie game developer.</p><p>i built this os cuz i wanted to :3</p><div class="about-meta"><span>version <b>0.7.3</b></span><span>made with <b>html · css · js</b></span><span>credits <b>dee + the static</b></span></div></div></section>
+      <section class="window app-window" id="about" aria-label="about window" style="display: none;"><div class="window-header" id="aboutheader"><span class="window-title">about-me.dee</span><div class="window-actions"><button class="window-action minimize" type="button" aria-label="minimize">_</button><button class="close-button" type="button" aria-label="close">×</button></div></div><div class="window-content about-content"><p class="eyebrow">welcome i guess</p><h1>glitchyOS</h1><h2>hi, i'm dee.</h2><p>i'm a student and an indie game developer.</p><p>i built this os cuz i wanted to :3</p><div class="about-meta"><span>version <b>0.6.7</b></span><span>made with <b>html · css · js</b></span><span>credits <b>dee</b></span></div></div></section>
 
       <section class="window app-window secret-window" id="glitch" aria-label="glitch.exe window" style="display: none;"><div class="window-header" id="glitchheader"><span class="window-title">glitch.exe</span><div class="window-actions"><button class="close-button" type="button" aria-label="close">×</button></div></div><div class="window-content glitch-content"><p class="eyebrow">u found a secret thing</p><div id="glitchText">you found the door.</div><button id="glitchButton" class="glitch-button" type="button">do not click</button></div></section>
 
       <div class="notification" id="notification" role="status"></div>
       <img class="jumpscare-image" id="jumpscareImage" src="assets/lame jumpscare.jpg" alt="" aria-hidden="true" hidden />
-      <div class="boot-screen" id="bootScreen"><span>glitchyOS</span><p>ok fine. booting.</p></div>
-      <div class="shutdown-screen" id="shutdownScreen" hidden><div class="shutdown-mark">g<span>/</span>OS</div><p id="shutdownText">disconnecting from the static...</p></div>
+      <div class="boot-screen" id="bootScreen"><span>glitchyOS</span><p>booting.</p></div>
+      <div class="shutdown-screen" id="shutdownScreen" hidden><div class="shutdown-mark">g<span>/</span>OS</div><p id="shutdownText">disconnecting...</p></div>
 
       <header class="top-bar">
-        <button class="os-name" id="launcherButton" type="button" aria-expanded="false">glitchyOS <span class="launcher-caret">⌃</span></button>
+        <span class="os-name">glitchyOS</span>
         <div class="taskbar-apps" id="taskbarApps"></div>
         <div class="top-actions"><button id="restartButton" type="button" aria-label="Restart glitchyOS">↻</button><button id="shutdownButton" type="button" aria-label="Shutdown glitchyOS">⏻</button>
         <time id="timeElement" class="time" aria-label="Current time">--:--:--</time>
