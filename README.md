@@ -25,12 +25,6 @@ HTML
 CSS
 JavaScript
 
- 
-## running it
-clone the repo and open index.html.
-
-that's basically it.
-
 ## made by
 dee
 
@@ -38,6 +32,4 @@ made for Hack Club Stardance 2026.
 
 btw
 
-if you find something weird, it might be intentional.
-or i broke something
-idk
+if you find something weird, it might be intentional
